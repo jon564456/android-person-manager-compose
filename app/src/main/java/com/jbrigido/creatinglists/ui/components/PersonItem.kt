@@ -7,13 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -33,7 +28,6 @@ import com.jbrigido.creatinglists.domain.Person.Person
 @Composable
 fun PersonItem(person: Person) {
     val img = painterResource(R.drawable.spiderman)
-    var checkState by remember { mutableStateOf(false) }
     Row(
         Modifier
             .padding(10.dp)
@@ -72,7 +66,6 @@ fun PersonItem(person: Person) {
             )
         }
 
-        Checkbox(checked = checkState, onCheckedChange = { checkState = it })
 
     }
 }

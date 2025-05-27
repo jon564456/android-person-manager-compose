@@ -13,12 +13,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.jbrigido.creatinglists.Core.AppDatabase
 import com.jbrigido.creatinglists.domain.Person.Person
 import com.jbrigido.creatinglists.ui.components.PersonItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun ListScreen(onNavigateToAddPerson: () -> Unit) {
@@ -26,19 +31,24 @@ fun ListScreen(onNavigateToAddPerson: () -> Unit) {
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
 
-        var db: AppDatabase?
         val context = LocalContext.current
+        val db = remember { Database.getInstance(context) }
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
 
-            db = Database.getInstance(context)
-            db!!.personDAO().getAll()
-            val list: List<Person>? =
+            val personlist = remember { mutableStateOf<List<Person>>(emptyList()) }
 
-                DisplayInformation(list, Modifier.weight(1f, true))
+            LaunchedEffect(Unit) {
+                db.personDAO().getAll().collect { people ->
+                    personlist.value = people
+                }
+            }
+            DisplayInformation(personlist.value, Modifier.weight(1f, true))
+
+
 
             Row(
                 modifier = Modifier
@@ -54,8 +64,11 @@ fun ListScreen(onNavigateToAddPerson: () -> Unit) {
                     Text("Add")
                 }
                 Button(onClick = {
-                    if (list.isNotEmpty()) {
-                        list.removeAt(list.lastIndex)
+                    val person = personlist.value.lastOrNull()
+                    if (person != null) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            db.personDAO().delete(person)
+                        }
                     }
                 }) {
                     Text("Delete")
@@ -64,6 +77,7 @@ fun ListScreen(onNavigateToAddPerson: () -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun DisplayInformation(list: List<Person>, modifier: Modifier) {

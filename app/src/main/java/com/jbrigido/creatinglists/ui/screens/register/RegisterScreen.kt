@@ -16,14 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.jbrigido.creatinglists.Core.AppDatabase
 import com.jbrigido.creatinglists.domain.Person.Person
+import kotlinx.coroutines.launch
 
 /**
  * This composable function generates a screen
@@ -38,8 +39,8 @@ fun RegisterScreen(onNavigateToList: () -> Unit) {
     var stateGender by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-
-    var db: AppDatabase?
+    val db = remember { Database.getInstance(context) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         Modifier.fillMaxSize()
@@ -51,6 +52,7 @@ fun RegisterScreen(onNavigateToList: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             val modifier: Modifier = Modifier.padding(10.dp)
             TextField(stateName, onValueChange = {
                 stateName = it
@@ -90,9 +92,9 @@ fun RegisterScreen(onNavigateToList: () -> Unit) {
                                 gender = stateGender
                             )
 
-                            db = Database.getInstance(context)
-                            db!!.personDAO().insertAll(person)
-
+                            coroutineScope.launch {
+                                db.personDAO().insert(person)
+                            }
                             stateName = ""
                             stateAge = ""
                             stateGender = ""

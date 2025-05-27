@@ -10,11 +10,10 @@ import kotlinx.coroutines.flow.Flow
 interface PersonDAO {
 
     @Query("SELECT *  FROM Person")
-    fun getAll(): List<Person>
+    fun getAll(): Flow<List<Person>>
 
     @Insert
-    fun insertAll(vararg person: Person )
-
+    suspend fun insert(vararg person: Person)
 
     @Delete
     fun delete(person: Person)
